@@ -13,9 +13,7 @@
         {% csrf_token %}
         <div class="d-none alert alert-danger" id="tweet-create-form-error"></div>
         <input type="hidden" value="/" name="next">
-        <label>
           <textarea class="form-control" required="required" name="content" placeholder="Your tweet ..."></textarea>
-        </label>
         <button type="submit" class="btn, btn btn-primary">Tweet</button>
       </form>
     </div>
@@ -78,6 +76,9 @@
                     alert("An error occurred. Dunno what to do.")
                 }
                 console.log(contentErrorMsg)
+            } else if (xhr.status === 401) {
+                alert("Log in please!")
+                window.location.href = "/login"
             } else if (xhr.status === 500) {
                 alert("Server is down. Errors everywhere. Go to sleep :)")
             }
