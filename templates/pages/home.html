@@ -101,11 +101,10 @@
         xhr.open(method, url)
         xhr.onload = function() {
             const serverResponse = xhr.response;
-            const listedItems = serverResponse.response;
             var finalTweetStr = "";
             var i;
-            for (i=0; i<listedItems.length; i++) {
-                var currentItem = formatTweetElement(listedItems[i])
+            for (i=0; i<serverResponse.length; i++) {
+                var currentItem = formatTweetElement(serverResponse[i])
                 finalTweetStr += currentItem
             }
             tweetsElement.innerHTML = finalTweetStr
