@@ -47,9 +47,8 @@
         const url = myForm.getAttribute("action")
         const method = myForm.getAttribute("method")
         const xhr = new XMLHttpRequest()
-        const responseType = 'json'
 
-        xhr.responseType = responseType
+        xhr.responseType = 'json'
         xhr.open(method, url)
         xhr.setRequestHeader("HTTP-X-REQUESTED-WITH", "XMLHttpRequest")
         xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
@@ -91,13 +90,28 @@
 
     tweetCreateFormEl.addEventListener("submit", tweetFormDidSubmitted)
 
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     function loadTweets(tweetsElement) {
         const xhr = new XMLHttpRequest()
         const method = 'GET'
-        const url = '/tweets/'
-        const responseType = 'json'
+        const url = '/tweets'
 
-        xhr.responseType = responseType
+        xhr.responseType = 'json'
         xhr.open(method, url)
         xhr.onload = function() {
             const serverResponse = xhr.response;
@@ -114,19 +128,48 @@
 
     loadTweets(tweetsContainerElement)
 
-    function handleDidLike(tweet_id, currentCount) {
-        console.log(tweet_id, currentCount)
+    function handleTweetActionBtn(tweet_id, currentCount, action) {
+        const url = "/api/tweets/action"
+        const method = "POST"
+        const data = JSON.stringify({
+            id: tweet_id,
+            action: action
+        })
+        const xhr = new XMLHttpRequest()
+        const csrf_token = getCookie('csrftoken')
+
+        xhr.open(method, url)
+        xhr.setRequestHeader("Content-Type", "application/json")
+        xhr.setRequestHeader("HTTP-X-REQUESTED-WITH", "XMLHttpRequest")
+        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+        xhr.setRequestHeader("X-CSRFToken", csrf_token)
+        xhr.onload = function() {
+            loadTweets(tweetsContainerElement)
+        }
+        xhr.send(data)
     }
 
     function LikeBtn(tweet) {
-        return "<button class='btn btn-primary' onclick=handleDidLike(" +
-            tweet.id + "," + tweet.likes + ")>Like</button>"
+        return "<button class='btn btn-primary' onclick=handleTweetActionBtn(" +
+            tweet.id + "," + tweet.likes + ",'like')>" + tweet.likes + " Like</button>"
+    }
+
+    function UnLikeBtn(tweet) {
+        return "<button class='btn btn-outline-primary' onclick=handleTweetActionBtn(" +
+            tweet.id + "," + tweet.likes + ",'unlike')>Unlike</button>"
+    }
+
+    function RetweetBtn(tweet) {
+        return "<button class='btn btn-outline-success' onclick=handleTweetActionBtn(" +
+            tweet.id + "," + tweet.likes + ",'retweet')>Retweet</button>"
     }
 
     function formatTweetElement(tweet) {
         return "<div class='col-12 col-md-10 mx-auto border rounded py-3 mb-4 tweet' id='tweet-" + tweet.id +
             "'><p>" + tweet.content + "</p><div class='btn-group'>" +
             LikeBtn(tweet) +
+            UnLikeBtn(tweet) +
+            RetweetBtn(tweet) +
             "</div></div>"
     }
   </script>

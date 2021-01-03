@@ -58,7 +58,7 @@ def tweet_delete_view(request, tweet_id, *args, **kwargs):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def tweet_action_view(request, *args, **kwargs):
-    serializer = TweetActionSerializer(data=request.POST)
+    serializer = TweetActionSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         data = serializer.validated_data
         tweet_id = data.get("id")
@@ -71,4 +71,4 @@ def tweet_action_view(request, *args, **kwargs):
         elif action == "retweet":
             pass
 
-    return Response({}, status=200)
+        return Response({"message": f"{action} performed"}, status=200)
