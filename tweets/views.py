@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Tweet
-from .serializers import TweetActionSerializer, TweetSerializer
+from .serializers import TweetActionSerializer, TweetCreateSerializer, TweetSerializer
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
@@ -18,7 +18,7 @@ def home_page(request, *args, **kwargs):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def tweet_create_view(request, *args, **kwargs):
-    serializer = TweetSerializer(data=request.POST)
+    serializer = TweetCreateSerializer(data=request.POST)
     if serializer.is_valid(raise_exception=True):
         serializer.save(user=request.user)
         return Response(serializer.data, status=201)
@@ -63,12 +63,19 @@ def tweet_action_view(request, *args, **kwargs):
         data = serializer.validated_data
         tweet_id = data.get("id")
         action = data.get("action")
+        content = data.get("content")
         tweet = get_object_or_404(Tweet, id=tweet_id)
         if action == "like":
             tweet.likes.add(request.user)
         elif action == "unlike":
             tweet.likes.remove(request.user)
         elif action == "retweet":
-            pass
+            new_tweet = Tweet.objects.create(
+                user=request.user,
+                parent=tweet,
+                content=content,
+            )
+            serializer = TweetSerializer(new_tweet)
+            return Response(serializer.data, status=201)
 
         return Response({"message": f"{action} performed"}, status=200)
