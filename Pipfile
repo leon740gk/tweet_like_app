@@ -10,6 +10,7 @@ flake8 = "*"
 djangorestframework = "*"
 wagtail = "*"
 django-cors-headers = "*"
+hubspot-api-client = "*"
 
 [dev-packages]
 
