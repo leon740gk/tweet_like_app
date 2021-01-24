@@ -14,7 +14,7 @@ from tweets.views import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home_page),
-    path("react/", TemplateView.as_view(template_name="react.html")),
+    path("react/", TemplateView.as_view(template_name="react_via_js.html")),
     path("tweets", tweet_list_view),
     path("create-tweet", tweet_create_view),
     path("tweets/<int:tweet_id>", tweet_detail_view),
