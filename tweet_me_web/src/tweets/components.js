@@ -1,6 +1,6 @@
 import React from "react";
 import {useEffect, useState} from "react";
-import {loadTweets} from "../lookup";
+import {loadTweets, createTweet} from "../lookup";
 
 
 export function TweetsComponent(props) {
@@ -10,11 +10,15 @@ export function TweetsComponent(props) {
         event.preventDefault();
         const newValue = textAreaRef.current.value
         let tempNewTweets = [...newTweets]
-        tempNewTweets.unshift({
-            content: newValue,
-            likes: 7,
-            id: 1234
+        createTweet(newValue, (response, status)=>{
+            if (status === 201) {
+                tempNewTweets.unshift(response)
+            } else {
+                console.log(response)
+                alert("An error occurred")
+            }
         })
+
         setNewTweets(tempNewTweets)
         console.log(newValue)
         textAreaRef.current.value = ""
@@ -36,6 +40,7 @@ export function TweetsComponent(props) {
 export function TweetList(props) {
     const [tweetsInit, setTweetsInit] = useState([])
     const [tweets, setTweets] = useState([])
+    const [tweetsDidSet, setTweetsDidSet] = useState(false)
     useEffect(() => {
         const final = [...props.newTweets].concat(tweetsInit)
         if (final.length !== tweets.length) {
@@ -43,15 +48,18 @@ export function TweetList(props) {
         }
     }, [props.newTweets, tweetsInit, tweets])
     useEffect(() => {
-        const tweetLoadCallback = (response, status) => {
-          if (status === 200) {
-            setTweetsInit(response)
-          } else {
-            alert("Something went wrong...")
-          }
+        if (tweetsDidSet === false) {
+            const tweetLoadCallback = (response, status) => {
+                if (status === 200) {
+                    setTweetsInit(response)
+                    setTweetsDidSet(true)
+                } else {
+                    alert("Something went wrong...")
+                }
+            }
+            loadTweets(tweetLoadCallback)
         }
-        loadTweets(tweetLoadCallback)
-    }, [])
+    }, [tweetsInit, tweetsDidSet, setTweetsDidSet])
     return tweets.map((item, index)=>{
         return <Tweet tweet={item} className='my-5 py-5 border bg-white text-dark' key={`${index}-{item.id}`}/>
     })
